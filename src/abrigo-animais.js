@@ -1,95 +1,95 @@
 class AbrigoAnimais {
-    constructor() {
-        this.animais = {
-            Rex: { especie: 'cão', brinquedos: ['RATO', 'BOLA'] },
-            Mimi: { especie: 'gato', brinquedos: ['BOLA', 'LASER'] },
-            Fofo: { especie: 'gato', brinquedos: ['BOLA', 'RATO', 'LASER'] },
-            Zero: { especie: 'gato', brinquedos: ['RATO', 'BOLA'] },
-            Bola: { especie: 'cão', brinquedos: ['CAIXA', 'NOVELO'] },
-            Bebe: { especie: 'cão', brinquedos: ['LASER', 'RATO', 'BOLA'] },
-            Loco: { especie: 'jabuti', brinquedos: ['SKATE', 'RATO'] }
-        };
+    animais = [
+        {
+            nome: 'Rex',
+            especie: 'cão',
+            brinquedos: ['RATO', 'BOLA'],
+        },
+        {
+            nome: 'Mimi',
+            especie: 'gato',
+            brinquedos: ['BOLA', 'LASER'],
+        },
+        {
+            nome: 'Fofo',
+            especie: 'gato',
+            brinquedos: ['BOLA', 'RATO', 'LASER'],
+        },
+        {
+            nome: 'Zero',
+            especie: 'gato',
+            brinquedos: ['RATO', 'BOLA'],
+        },
+        {
+            nome: 'Bola',
+            especie: 'cão',
+            brinquedos: ['CAIXA', 'NOVELO'],
+        },
+        {
+            nome: 'Bebe',
+            especie: 'cão',
+            brinquedos: ['LASER', 'RATO', 'BOLA'],
+        },
+        {
+            nome: 'Loco',
+            especie: 'jabuti',
+            brinquedos: ['SKATE', 'RATO'],
+        },
+    ]
+
+    encontrarBrinquedo(animal, brinquedosPessoa) {
+        let apto = false
+
+        animal.brinquedos.forEach((brinquedo, index) => {
+            const brinquedoPessoa = brinquedosPessoa.split(',')[index]
+            if (brinquedo === brinquedoPessoa) apto = true
+        })
+
+        return apto
     }
 
-
-    brinquedosNaOrdem(animalBrinquedos, listaPessoa) {
-        let indice = 0;
-        for (let b of listaPessoa) {
-            if (b === animalBrinquedos[indice]) indice++;
-            if (indice === animalBrinquedos.length) return true;
-        }
-        return false;
-    }
-
-
-    todosBrinquedosPresentes(animalBrinquedos, listaPessoa) {
-        return animalBrinquedos.every(b => listaPessoa.includes(b));
+    animalDivido(pessoa1, pessoa2) {
+        return pessoa1.reduce((dividido, animal) => {
+            return dividido || pessoa2.includes(animal)
+        }, false)
     }
 
     encontraPessoas(brinquedosPessoa1, brinquedosPessoa2, ordemAnimais) {
-        const pessoa1 = brinquedosPessoa1.split(',').map(b => b.trim().toUpperCase());
-        const pessoa2 = brinquedosPessoa2.split(',').map(b => b.trim().toUpperCase());
-        const animaisOrdem = ordemAnimais.split(',').map(a => a.trim());
-
-        // Validar animais
-        for (let animal of animaisOrdem) {
-            if (!this.animais[animal]) return { erro: 'Animal inválido' };
-        }
-        if (new Set(animaisOrdem).size !== animaisOrdem.length) return { erro: 'Animal inválido' };
-
-        // Validar duplicatas de brinquedos
-        if (new Set(pessoa1).size !== pessoa1.length || new Set(pessoa2).size !== pessoa2.length) {
-            return { erro: 'Brinquedo inválido' };
+        const animais = ordemAnimais.split(',')
+        const casa = {
+            pessoa1: [],
+            pessoa2: [],
         }
 
-        let contadorPessoa1 = 0;
-        let contadorPessoa2 = 0;
-        const resultado = [];
+        animais.forEach(nome => {
+            let animalEncontrado = undefined
 
-        for (let animalNome of animaisOrdem) {
-            const animal = this.animais[animalNome];
-            let dono = 'abrigo';
+            const animal = this.animais.find(a => a.nome === nome)
 
-            let p1Pode = false;
-            let p2Pode = false;
+            if (animal !== undefined) animalEncontrado = animal
 
-            if (animalNome === 'Loco') {
-
-                p1Pode = contadorPessoa1 < 3;
-                p2Pode = contadorPessoa2 < 3;
-            } else if (animal.especie === 'gato') {
-
-                p1Pode = this.brinquedosNaOrdem(animal.brinquedos, pessoa1) && contadorPessoa1 < 3;
-                p2Pode = this.brinquedosNaOrdem(animal.brinquedos, pessoa2) && contadorPessoa2 < 3;
-            } else {
-                // Cães: intercalamento, todos os brinquedos presentes
-                p1Pode = this.todosBrinquedosPresentes(animal.brinquedos, pessoa1) && contadorPessoa1 < 3;
-                p2Pode = this.todosBrinquedosPresentes(animal.brinquedos, pessoa2) && contadorPessoa2 < 3;
+            if (animalEncontrado === undefined) {
+                return {
+                    erro: 'Animal inválido',
+                }
             }
 
-
-            if (p1Pode && p2Pode) {
-                dono = 'abrigo';
-            } else if (p1Pode) {
-                dono = 'pessoa 1';
-                contadorPessoa1++;
-            } else if (p2Pode) {
-                dono = 'pessoa 2';
-                contadorPessoa2++;
+            if (this.encontrarBrinquedo(animalEncontrado, brinquedosPessoa1)) {
+                casa.pessoa1.push(animalEncontrado.nome)
             }
 
-            resultado.push(`${animalNome} - ${dono}`);
-        }
+            if (this.encontrarBrinquedo(animalEncontrado, brinquedosPessoa2)) {
+                casa.pessoa2.push(animalEncontrado.nome)
+            }
 
-
-        resultado.sort((a, b) => {
-            const nomeA = a.split(' - ')[0];
-            const nomeB = b.split(' - ')[0];
-            return nomeA.localeCompare(nomeB);
-        });
-
-        return { lista: resultado };
+            if (casa.pessoa1.join(',') === animalPessoa2.join(',')) {
+                casa.pessoa1 = []
+                casa.pessoa2 = []
+            }
+        })
     }
 }
 
-export { AbrigoAnimais as AbrigoAnimais };
+console.log(new AbrigoAnimais().encontraPessoas('BOLA, LASER', 'RATO,NOVELO', 'Fofo, Mimi'))
+
+export { AbrigoAnimais as AbrigoAnimais }
